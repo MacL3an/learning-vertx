@@ -1,0 +1,19 @@
+{
+  "services":
+  [
+  {
+  "id": "07a9953d-6604-4968-8bd1 - df33a075980a",
+          "name": "test service",
+          "url": "http://kry.se",
+          "status": "OK",
+          "lastCheck": "2014-06-16 16:42"
+  },
+  {
+  "id": "ab38ef4d-459e-48ed-a341-c3d7936c915a",
+          "name": "test service 2",
+          "url": "http://kry.se",
+          "status": "OK",
+          "lastCheck": "2014-06-17 16:42"
+  }  
+  ]
+}

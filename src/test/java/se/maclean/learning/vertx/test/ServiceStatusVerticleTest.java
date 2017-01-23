@@ -13,6 +13,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import se.maclean.learning.vertx.DataHandler;
+import se.maclean.learning.vertx.LocalDiskDataHandler;
 import se.maclean.learning.vertx.ServiceStatusVerticle;
 
 /**
@@ -27,7 +29,8 @@ public class ServiceStatusVerticleTest {
   @Before
   public void setUp(TestContext context) {
     vertx = Vertx.vertx();
-    vertx.deployVerticle(ServiceStatusVerticle.class.getName(),
+    DataHandler dataHandler = new LocalDiskDataHandler("testServices.json");
+    vertx.deployVerticle(new ServiceStatusVerticle(dataHandler),
         context.asyncAssertSuccess());
   }
 

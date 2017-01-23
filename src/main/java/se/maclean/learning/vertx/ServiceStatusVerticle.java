@@ -18,6 +18,11 @@ import io.vertx.ext.web.RoutingContext;
 public class ServiceStatusVerticle extends AbstractVerticle {
 
   private HttpServer httpServer = null;
+  private DataHandler dataHandler;
+  
+  public ServiceStatusVerticle(DataHandler dataHandler) {
+    this.dataHandler = dataHandler;
+  }
 
   @Override
   public void start(Future<Void> fut) {
@@ -43,15 +48,6 @@ public class ServiceStatusVerticle extends AbstractVerticle {
   }
 
   private void getAllServices(RoutingContext routingContext) {
-    //TODO: Run this synch or asynch?
-    // Buffer servicesBuffer = null;
-    //servicesBuffer = vertx.fileSystem().readFileBlocking("services.json"); 
-    //r.response().end(servicesBuffer);       
-
-    vertx.fileSystem().readFile("services.json", servicesBuffer -> {
-      {
-        routingContext.response().end(servicesBuffer.result());
-      }
-    });
+      routingContext.response().end(dataHandler.getData());
   }
 }
