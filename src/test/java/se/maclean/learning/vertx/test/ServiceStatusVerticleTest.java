@@ -6,6 +6,7 @@
 package se.maclean.learning.vertx.test;
 
 import io.vertx.core.Vertx;
+import io.vertx.core.json.Json;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -15,6 +16,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import se.maclean.learning.vertx.DataHandler;
 import se.maclean.learning.vertx.LocalDiskDataHandler;
+import se.maclean.learning.vertx.ServiceContainer;
 import se.maclean.learning.vertx.ServiceStatusVerticle;
 
 /**
@@ -47,6 +49,21 @@ public class ServiceStatusVerticleTest {
      response -> {
       response.handler(body -> {
         context.assertTrue(body.toString().contains("kry.se"));
+        async.complete();
+      });
+    });
+  }
+  
+  
+  @Test
+  public void testGetEndpointReturnsCorrectNoOfServices(TestContext context) {
+    final Async async = context.async();
+
+    vertx.createHttpClient().getNow(8080, "localhost", "/services",
+     response -> {
+      response.handler(body -> {        
+        ServiceContainer serviceContainer = Json.decodeValue(body.toString(), ServiceContainer.class);
+        context.assertTrue(serviceContainer.getServices().size() == 2, "Wrong no of services");        
         async.complete();
       });
     });
