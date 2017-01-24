@@ -11,13 +11,13 @@ import java.util.List;
  *
  * @author MacL3an
  */
-public class ServiceContainer {
+public class KryServicesForJson {
   private List<KryService> services;
 
-  public ServiceContainer() {
+  public KryServicesForJson() {
   }
   
-  public ServiceContainer(List<KryService> services) {
+  public KryServicesForJson(List<KryService> services) {
     this.services = services;
   }
   

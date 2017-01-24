@@ -5,10 +5,15 @@
  */
 package se.maclean.learning.vertx;
 
+import java.util.Map;
+
 /**
  *
  * @author MacL3an
  */
-public interface DataHandler {
-  public String getData();
+public interface ServiceProvider {
+  public Map<String, KryService> get();
+  public void remove(String id);
+  public void add(KryService kryService);
+  public boolean exists(String id);
 }

@@ -14,11 +14,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import se.maclean.learning.vertx.DataHandler;
 import se.maclean.learning.vertx.KryService;
-import se.maclean.learning.vertx.LocalDiskDataHandler;
-import se.maclean.learning.vertx.ServiceContainer;
+import se.maclean.learning.vertx.KryServicesForJson;
+import se.maclean.learning.vertx.LocalDiscServiceProviderWithoutPersistance;
 import se.maclean.learning.vertx.ServiceStatusVerticle;
+import se.maclean.learning.vertx.ServiceProvider;
 
 /**
  *
@@ -35,8 +35,8 @@ public class ServiceStatusVerticleTest {
   @Before
   public void setUp(TestContext context) {
     vertx = Vertx.vertx();
-    DataHandler dataHandler = new LocalDiskDataHandler("testServices.json");
-    vertx.deployVerticle(new ServiceStatusVerticle(dataHandler),
+    ServiceProvider serviceProvider = new LocalDiscServiceProviderWithoutPersistance("testServices.json");
+    vertx.deployVerticle(new ServiceStatusVerticle(serviceProvider),
         context.asyncAssertSuccess());
   }
 
@@ -66,7 +66,7 @@ public class ServiceStatusVerticleTest {
     vertx.createHttpClient().getNow(port, server, servicesEndPoint,
      response -> {
       response.handler(body -> {        
-        ServiceContainer serviceContainer = Json.decodeValue(body.toString(), ServiceContainer.class);
+        KryServicesForJson serviceContainer = Json.decodeValue(body.toString(), KryServicesForJson.class);
         context.assertTrue(serviceContainer.getServices().size() == 2, "Wrong no of services");        
         async.complete();
       });
@@ -99,6 +99,20 @@ public class ServiceStatusVerticleTest {
             .end();
   }
   
+      
+   @Test
+  public void testDeleteEndpointStatus400(TestContext context) {
+    final Async async = context.async();
+    final String nonExistingId = "apa";
+    
+    vertx.createHttpClient().delete(port, server, servicesEndPoint + "/" + nonExistingId)
+            .handler(response -> {
+              context.assertEquals(response.statusCode(), 400);
+              async.complete();
+            })
+            .end();
+  }
+  
    @Test
   public void testDeleteEndpointStatus204(TestContext context) {
     final Async async = context.async();
@@ -112,17 +126,4 @@ public class ServiceStatusVerticleTest {
             .end();
   }
   
-    
-   @Test
-  public void testDeleteEndpointStatus400(TestContext context) {
-    final Async async = context.async();
-    final String nonExistingId = "apa";
-    
-    vertx.createHttpClient().delete(port, server, servicesEndPoint + "/" + nonExistingId)
-            .handler(response -> {
-              context.assertEquals(response.statusCode(), 400);
-              async.complete();
-            })
-            .end();
-  }
 }

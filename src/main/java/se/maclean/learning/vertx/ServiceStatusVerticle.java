@@ -28,17 +28,10 @@ import java.util.logging.Logger;
 public class ServiceStatusVerticle extends AbstractVerticle {
 
   private HttpServer httpServer = null;
-  private DataHandler dataHandler = null;
-  private Map<String, KryService> services = null;
+  private ServiceProvider serviceProvider = null;
 
-  public ServiceStatusVerticle(DataHandler dataHandler) {
-    this.dataHandler = dataHandler;
-    String receivedData = dataHandler.getData();
-    ServiceContainer serviceContainer = Json.decodeValue(receivedData, ServiceContainer.class);
-    services = new HashMap<>();
-    for (KryService service : serviceContainer.getServices()) {
-      services.put(service.getId(), service);
-    }
+  public ServiceStatusVerticle(ServiceProvider serviceProvider) {
+    this.serviceProvider = serviceProvider;
   }
 
   @Override
@@ -63,15 +56,16 @@ public class ServiceStatusVerticle extends AbstractVerticle {
   }
 
   private void getAllServices(RoutingContext routingContext) {
-    ServiceContainer serviceContainer = new ServiceContainer(new ArrayList(services.values()));
-    String serializedServices = Json.encodePrettily(serviceContainer);
+    KryServicesForJson kryServices = new KryServicesForJson(
+            new ArrayList(serviceProvider.get().values()));
+    String serializedServices = Json.encodePrettily(kryServices);
     routingContext.response().end(serializedServices);
   }
 
   private void addService(RoutingContext routingContext) {
     KryService newService = Json.decodeValue(routingContext.getBodyAsString(),
             KryService.class);
-    services.put(newService.getId(), newService);
+    serviceProvider.add(newService);
     routingContext.response()
       .setStatusCode(201)
       .putHeader("content-type", "application/json; charset=utf-8")
@@ -80,11 +74,11 @@ public class ServiceStatusVerticle extends AbstractVerticle {
   
   private void removeService(RoutingContext routingContext) {
     String idToDelete = routingContext.request().getParam("id");
-    if (idToDelete == null || !services.containsKey(idToDelete)) {
+    if (idToDelete == null || !serviceProvider.exists(idToDelete)) {
       routingContext.response().setStatusCode(400).end();
     }
     else {
-      services.remove(idToDelete);
+      serviceProvider.remove(idToDelete);
       routingContext.response().setStatusCode(204).end();
     }
   }
