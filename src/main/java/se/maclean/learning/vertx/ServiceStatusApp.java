@@ -12,12 +12,13 @@ import io.vertx.core.Vertx;
  * @author MacL3an
  */
 public class ServiceStatusApp {
-    private static final String servicesFileName = "services.json";
+    private static final String servicesFileName = "services.json";   
   
       public static void main(String[] args) {
         Vertx vertx = Vertx.vertx();
         ServiceProvider dataHandler = new LocalDiscServiceProvider(servicesFileName);
         
-        vertx.deployVerticle(new ServiceStatusVerticle(dataHandler));
+        vertx.deployVerticle(new ServiceStatusRestProviderVerticle(dataHandler));
+        vertx.deployVerticle(new ServiceStatusCheckerVerticle(dataHandler));
     }
 }

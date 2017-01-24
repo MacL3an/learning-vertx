@@ -12,8 +12,10 @@ import java.util.Map;
  * @author MacL3an
  */
 public interface ServiceProvider {
+  public void reload();
   public Map<String, KryService> get();
   public void remove(String id);
   public void add(KryService kryService);
   public boolean exists(String id);
+  public void setStatus(String id, String status, String lastCheck);
 }

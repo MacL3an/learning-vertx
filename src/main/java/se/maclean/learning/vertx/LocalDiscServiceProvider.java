@@ -32,6 +32,12 @@ public class LocalDiscServiceProvider extends LocalDiscServiceProviderWithoutPer
     super.add(newService);
     persistToDisk();
   }
+  
+    @Override
+  public void setStatus(String id, String status, String lastCheck) {
+    super.setStatus(id, status, lastCheck);
+    persistToDisk(); //TODO: Implement throttle delay 
+  }
 
   private void persistToDisk() {
     KryServicesForJson kryServices = new KryServicesForJson(

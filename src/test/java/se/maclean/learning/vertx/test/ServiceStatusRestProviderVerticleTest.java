@@ -17,7 +17,7 @@ import org.junit.runner.RunWith;
 import se.maclean.learning.vertx.KryService;
 import se.maclean.learning.vertx.KryServicesForJson;
 import se.maclean.learning.vertx.LocalDiscServiceProviderWithoutPersistance;
-import se.maclean.learning.vertx.ServiceStatusVerticle;
+import se.maclean.learning.vertx.ServiceStatusRestProviderVerticle;
 import se.maclean.learning.vertx.ServiceProvider;
 
 /**
@@ -25,7 +25,7 @@ import se.maclean.learning.vertx.ServiceProvider;
  * @author MacL3an
  */
 @RunWith(VertxUnitRunner.class)
-public class ServiceStatusVerticleTest {
+public class ServiceStatusRestProviderVerticleTest {
 
   private Vertx vertx;
   private final int port = 8080;
@@ -36,7 +36,7 @@ public class ServiceStatusVerticleTest {
   public void setUp(TestContext context) {
     vertx = Vertx.vertx();
     ServiceProvider serviceProvider = new LocalDiscServiceProviderWithoutPersistance("testServices.json");
-    vertx.deployVerticle(new ServiceStatusVerticle(serviceProvider),
+    vertx.deployVerticle(new ServiceStatusRestProviderVerticle(serviceProvider),
         context.asyncAssertSuccess());
   }
 

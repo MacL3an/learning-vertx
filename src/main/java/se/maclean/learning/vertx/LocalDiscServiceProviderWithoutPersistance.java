@@ -20,16 +20,15 @@ import org.apache.commons.io.FileUtils;
  * @author MacL3an
  */
 public class LocalDiscServiceProviderWithoutPersistance implements ServiceProvider {
-
   protected String fileName;
   HashMap<String, KryService> services;
 
   public LocalDiscServiceProviderWithoutPersistance(String fileName) {
     this.fileName = fileName;
-    loadServices();
+    loadServicesFromDisk();
   }
 
-  private void loadServices() {
+  private void loadServicesFromDisk() {
     String json = readJsonFromDisk();
     KryServicesForJson kryServices = Json.decodeValue(json, KryServicesForJson.class);
 
@@ -55,7 +54,6 @@ public class LocalDiscServiceProviderWithoutPersistance implements ServiceProvid
 
   @Override
   public Map<String, KryService> get() {
-    loadServices();
     return services;
   }
 
@@ -76,5 +74,20 @@ public class LocalDiscServiceProviderWithoutPersistance implements ServiceProvid
   @Override
   public boolean exists(String id) {
     return services.containsKey(id);
+  }
+
+  @Override
+  public void reload() {
+    loadServicesFromDisk();
+  }
+
+  @Override
+  public void setStatus(String id, String status, String lastCheck) {
+    KryService serviceToUpdate = services.get(id);
+    if (serviceToUpdate == null) {
+      throw new UnsupportedOperationException("Cannot find status object");
+    }
+    serviceToUpdate.setStatus(status);
+    serviceToUpdate.setLastCheck(lastCheck);
   }
 }

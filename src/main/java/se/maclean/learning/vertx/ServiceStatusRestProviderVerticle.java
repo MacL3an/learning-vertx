@@ -13,24 +13,19 @@ import io.vertx.core.json.Json;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
-import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
  * @author MacL3an
  */
-public class ServiceStatusVerticle extends AbstractVerticle {
+public class ServiceStatusRestProviderVerticle extends AbstractVerticle {
 
   private HttpServer httpServer = null;
   private ServiceProvider serviceProvider = null;
 
-  public ServiceStatusVerticle(ServiceProvider serviceProvider) {
+  public ServiceStatusRestProviderVerticle(ServiceProvider serviceProvider) {
     this.serviceProvider = serviceProvider;
   }
 
@@ -41,6 +36,13 @@ public class ServiceStatusVerticle extends AbstractVerticle {
     router.get("/services").handler(this::getAllServices);
     router.post("/services").handler(this::addService);
     router.delete("/services/:id").handler(this::removeService);
+
+    vertx.eventBus().consumer(ServiceStatusCheckerVerticle.MESSAGE_BUS_ADDRESS, message -> {
+      if (message.body() == ServiceStatusCheckerVerticle.RELOAD_SERVICES) {
+        System.out.println(Instant.now() + ": Reloading service status...");
+        serviceProvider.reload();
+      }
+    });
 
     httpServer = vertx.createHttpServer();
     httpServer.requestHandler(request -> {
@@ -59,7 +61,10 @@ public class ServiceStatusVerticle extends AbstractVerticle {
     KryServicesForJson kryServices = new KryServicesForJson(
             new ArrayList(serviceProvider.get().values()));
     String serializedServices = Json.encodePrettily(kryServices);
-    routingContext.response().end(serializedServices);
+    routingContext.response()
+            .setStatusCode(200)
+            .putHeader("content-type", "application/json; charset=utf-8")
+            .end(serializedServices);
   }
 
   private void addService(RoutingContext routingContext) {
@@ -67,17 +72,16 @@ public class ServiceStatusVerticle extends AbstractVerticle {
             KryService.class);
     serviceProvider.add(newService);
     routingContext.response()
-      .setStatusCode(201)
-      .putHeader("content-type", "application/json; charset=utf-8")
-      .end(Json.encodePrettily(newService));
+            .setStatusCode(201)
+            .putHeader("content-type", "application/json; charset=utf-8")
+            .end(Json.encodePrettily(newService));
   }
-  
+
   private void removeService(RoutingContext routingContext) {
     String idToDelete = routingContext.request().getParam("id");
     if (idToDelete == null || !serviceProvider.exists(idToDelete)) {
       routingContext.response().setStatusCode(400).end();
-    }
-    else {
+    } else {
       serviceProvider.remove(idToDelete);
       routingContext.response().setStatusCode(204).end();
     }
