@@ -16,6 +16,17 @@ public class KryService {
   private String status; //TODO: Convert to enum
   private String lastCheck; //TODO: Convert to date
 
+  public KryService() {    
+  }
+
+  public KryService(String id, String name, String url, String status, String lastCheck) {
+    this.id = id;
+    this.name = name;
+    this.url = url;
+    this.status = status;
+    this.lastCheck = lastCheck;
+  }
+  
   /**
    * @return the id
    */
@@ -28,6 +39,13 @@ public class KryService {
    */
   public void setId(String id) {
     this.id = id;
+  }
+  
+  /**
+   * @return the name
+   */
+  public String getName() {
+    return name;
   }
   
   /**

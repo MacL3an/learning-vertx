@@ -12,6 +12,7 @@ import io.vertx.core.Future;
 import io.vertx.core.json.Json;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.handler.BodyHandler;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,17 +44,15 @@ public class ServiceStatusVerticle extends AbstractVerticle {
   @Override
   public void start(Future<Void> fut) {
     Router router = Router.router(vertx);
-
-    router.route("/services").handler(routingContext -> {
-      getAllServices(routingContext);
-    });
+    router.route("/services*").handler(BodyHandler.create());
+    router.get("/services").handler(this::getAllServices);
+    router.post("/services").handler(this::addService);
+    router.delete("/services/:id").handler(this::removeService);
 
     httpServer = vertx.createHttpServer();
-
     httpServer.requestHandler(request -> {
       router.accept(request);
     });
-
     httpServer.listen(8080, result -> {
       if (result.succeeded()) {
         fut.complete();
@@ -64,8 +63,29 @@ public class ServiceStatusVerticle extends AbstractVerticle {
   }
 
   private void getAllServices(RoutingContext routingContext) {
-    ServiceContainer serviceContainer = new ServiceContainer(new ArrayList(services.values())); 
+    ServiceContainer serviceContainer = new ServiceContainer(new ArrayList(services.values()));
     String serializedServices = Json.encodePrettily(serviceContainer);
     routingContext.response().end(serializedServices);
+  }
+
+  private void addService(RoutingContext routingContext) {
+    KryService newService = Json.decodeValue(routingContext.getBodyAsString(),
+            KryService.class);
+    services.put(newService.getId(), newService);
+    routingContext.response()
+      .setStatusCode(201)
+      .putHeader("content-type", "application/json; charset=utf-8")
+      .end(Json.encodePrettily(newService));
+  }
+  
+  private void removeService(RoutingContext routingContext) {
+    String idToDelete = routingContext.request().getParam("id");
+    if (idToDelete == null || !services.containsKey(idToDelete)) {
+      routingContext.response().setStatusCode(400).end();
+    }
+    else {
+      services.remove(idToDelete);
+      routingContext.response().setStatusCode(204).end();
+    }
   }
 }
