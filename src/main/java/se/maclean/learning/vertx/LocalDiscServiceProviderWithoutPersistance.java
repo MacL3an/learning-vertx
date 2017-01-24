@@ -45,7 +45,7 @@ public class LocalDiscServiceProviderWithoutPersistance implements ServiceProvid
     String result = "";
     try {
       File file = new File(classLoader.getResource(fileName).getPath());
-      result = FileUtils.readFileToString(file);
+      result = FileUtils.readFileToString(file, "UTF-8");
     } catch (IOException ex) {
       ex.printStackTrace();
     }
