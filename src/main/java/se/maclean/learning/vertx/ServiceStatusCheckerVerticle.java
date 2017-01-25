@@ -24,7 +24,8 @@ import java.util.logging.Logger;
 public class ServiceStatusCheckerVerticle extends AbstractVerticle {
 
   public static final String MESSAGE_BUS_ADDRESS = "messageBusAddress";
-  public static final String RELOAD_SERVICES = "reloadServices";
+  public static final String SERVICES_CHECKED = "servicesChecked";
+  public static final String CHECK_SERVICES = "checkServices";
 
   private ServiceProvider serviceProvider = null;
 
@@ -38,9 +39,15 @@ public class ServiceStatusCheckerVerticle extends AbstractVerticle {
       @Override
       public void handle(Long aLong) {
         checkAllServices();
-        vertx.eventBus().publish(MESSAGE_BUS_ADDRESS, RELOAD_SERVICES);
       }
     });
+    
+      vertx.eventBus().consumer(ServiceStatusCheckerVerticle.MESSAGE_BUS_ADDRESS, message -> {
+      if (message.body() == ServiceStatusCheckerVerticle.CHECK_SERVICES) {
+        checkAllServices();
+      }
+    });
+    
   }
 
   private void checkAllServices() {
@@ -52,6 +59,7 @@ public class ServiceStatusCheckerVerticle extends AbstractVerticle {
       String lastCheck = sdf.format(now);
       serviceProvider.setStatus(service.getId(), String.valueOf(status), lastCheck);
     }
+    vertx.eventBus().publish(MESSAGE_BUS_ADDRESS, SERVICES_CHECKED);
   }
 
   private int checkServiceStatus(String address) {

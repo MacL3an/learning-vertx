@@ -13,8 +13,13 @@ import io.vertx.core.json.Json;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
+import io.vertx.ext.web.handler.StaticHandler;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.UUID;
+import static se.maclean.learning.vertx.ServiceStatusCheckerVerticle.MESSAGE_BUS_ADDRESS;
+import static se.maclean.learning.vertx.ServiceStatusCheckerVerticle.SERVICES_CHECKED;
+import static se.maclean.learning.vertx.ServiceStatusCheckerVerticle.CHECK_SERVICES;
 
 /**
  *
@@ -38,7 +43,7 @@ public class ServiceStatusRestProviderVerticle extends AbstractVerticle {
     router.delete("/services/:id").handler(this::removeService);
 
     vertx.eventBus().consumer(ServiceStatusCheckerVerticle.MESSAGE_BUS_ADDRESS, message -> {
-      if (message.body() == ServiceStatusCheckerVerticle.RELOAD_SERVICES) {
+      if (message.body() == ServiceStatusCheckerVerticle.SERVICES_CHECKED) {
         System.out.println(Instant.now() + ": Reloading service status...");
         serviceProvider.reload();
       }
@@ -70,7 +75,9 @@ public class ServiceStatusRestProviderVerticle extends AbstractVerticle {
   private void addService(RoutingContext routingContext) {
     KryService newService = Json.decodeValue(routingContext.getBodyAsString(),
             KryService.class);
+    newService.setId(UUID.randomUUID().toString());
     serviceProvider.add(newService);
+    vertx.eventBus().publish(MESSAGE_BUS_ADDRESS, CHECK_SERVICES);
     routingContext.response()
             .setStatusCode(201)
             .putHeader("content-type", "application/json; charset=utf-8")
