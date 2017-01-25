@@ -41,6 +41,8 @@ public class ServiceStatusRestProviderVerticle extends AbstractVerticle {
     router.get("/services").handler(this::getAllServices);
     router.post("/services").handler(this::addService);
     router.delete("/services/:id").handler(this::removeService);
+     // Serve static resources from the /assets directory
+    router.route("/assets/*").handler(StaticHandler.create("assets"));
 
     vertx.eventBus().consumer(ServiceStatusCheckerVerticle.MESSAGE_BUS_ADDRESS, message -> {
       if (message.body() == ServiceStatusCheckerVerticle.SERVICES_CHECKED) {
