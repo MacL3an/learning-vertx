@@ -14,6 +14,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import se.maclean.learning.vertx.DataSource;
 import se.maclean.learning.vertx.KryService;
 import se.maclean.learning.vertx.KryServicesForJson;
@@ -27,7 +29,7 @@ import se.maclean.learning.vertx.ServiceProvider;
  */
 @RunWith(VertxUnitRunner.class)
 public class ServiceStatusRestProviderVerticleTest {
-
+  private DataSource mockedDataSource;
   private Vertx vertx;
   private final int port = 8080;
   private final String server = "localhost";
@@ -35,9 +37,11 @@ public class ServiceStatusRestProviderVerticleTest {
 
   @Before
   public void setUp(TestContext context) {
+    mockedDataSource = mock(LocalDiscDataSource.class);
+    when(mockedDataSource.readFromSource()).thenReturn(getTestData());    
+
     vertx = Vertx.vertx();
-    DataSource dataSource = new LocalDiscDataSource("testServices.json");
-    ServiceProvider serviceProvider = new ServiceProvider(dataSource);
+    ServiceProvider serviceProvider = new ServiceProvider(mockedDataSource);
 
     vertx.deployVerticle(new ServiceStatusRestProviderVerticle(serviceProvider),
         context.asyncAssertSuccess());
@@ -129,4 +133,26 @@ public class ServiceStatusRestProviderVerticleTest {
             .end();
   }
   
+    
+  private String getTestData(){
+    return "{\n"
+            + "  \"services\":\n"
+            + "  [\n"
+            + "  {\n"
+            + "  \"id\": \"07a9953d-6604-4968-8bd1-df33a075980a\",\n"
+            + "          \"name\": \"test service\",\n"
+            + "          \"url\": \"http://kry.se\",\n"
+            + "          \"status\": \"OK\",\n"
+            + "          \"lastCheck\": \"2014-06-16 16:42\"\n"
+            + "  },\n"
+            + "  {\n"
+            + "  \"id\": \"ab38ef4d-459e-48ed-a341-c3d7936c915a\",\n"
+            + "          \"name\": \"test service 2\",\n"
+            + "          \"url\": \"http://google.se\",\n"
+            + "          \"status\": \"OK\",\n"
+            + "          \"lastCheck\": \"2014-06-17 16:42\"\n"
+            + "  }  \n"
+            + "  ]\n"
+            + "}";
+  }
 }
