@@ -5,7 +5,6 @@
  */
 package se.maclean.learning.vertx;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
@@ -18,7 +17,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.UUID;
 import static se.maclean.learning.vertx.ServiceStatusCheckerVerticle.MESSAGE_BUS_ADDRESS;
-import static se.maclean.learning.vertx.ServiceStatusCheckerVerticle.SERVICES_CHECKED;
 import static se.maclean.learning.vertx.ServiceStatusCheckerVerticle.CHECK_SERVICES;
 
 /**

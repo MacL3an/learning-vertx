@@ -16,9 +16,10 @@ public class ServiceStatusApp {
   
       public static void main(String[] args) {
         Vertx vertx = Vertx.vertx();
-        ServiceProvider dataHandler = new LocalDiscServiceProvider(servicesFileName);
+        DataSource dataSource = new LocalDiscDataSource(servicesFileName);
+        ServiceProvider serviceProvider = new ServiceProvider(dataSource);
         
-        vertx.deployVerticle(new ServiceStatusRestProviderVerticle(dataHandler));
-        vertx.deployVerticle(new ServiceStatusCheckerVerticle(dataHandler));
+        vertx.deployVerticle(new ServiceStatusRestProviderVerticle(serviceProvider));
+        vertx.deployVerticle(new ServiceStatusCheckerVerticle(serviceProvider));
     }
 }
