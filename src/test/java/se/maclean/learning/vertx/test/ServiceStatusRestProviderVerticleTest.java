@@ -14,9 +14,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import se.maclean.learning.vertx.DataSource;
 import se.maclean.learning.vertx.KryService;
 import se.maclean.learning.vertx.KryServicesForJson;
-import se.maclean.learning.vertx.LocalDiscServiceProviderWithoutPersistance;
+import se.maclean.learning.vertx.LocalDiscDataSource;
 import se.maclean.learning.vertx.ServiceStatusRestProviderVerticle;
 import se.maclean.learning.vertx.ServiceProvider;
 
@@ -35,7 +36,9 @@ public class ServiceStatusRestProviderVerticleTest {
   @Before
   public void setUp(TestContext context) {
     vertx = Vertx.vertx();
-    ServiceProvider serviceProvider = new LocalDiscServiceProviderWithoutPersistance("testServices.json");
+    DataSource dataSource = new LocalDiscDataSource("testServices.json");
+    ServiceProvider serviceProvider = new ServiceProvider(dataSource);
+
     vertx.deployVerticle(new ServiceStatusRestProviderVerticle(serviceProvider),
         context.asyncAssertSuccess());
   }
