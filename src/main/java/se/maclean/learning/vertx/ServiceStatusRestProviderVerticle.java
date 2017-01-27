@@ -63,9 +63,7 @@ public class ServiceStatusRestProviderVerticle extends AbstractVerticle {
   }
 
   private void getAllServices(RoutingContext routingContext) {
-    KryServicesForJson kryServices = new KryServicesForJson(
-            new ArrayList(serviceProvider.get().values()));
-    String serializedServices = Json.encodePrettily(kryServices);
+    String serializedServices = Json.encodePrettily(serviceProvider.get().values());
     routingContext.response()
             .setStatusCode(200)
             .putHeader("content-type", "application/json; charset=utf-8")
