@@ -10,6 +10,8 @@ import io.vertx.core.json.Json;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,10 +20,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import se.maclean.learning.vertx.DataSource;
 import se.maclean.learning.vertx.KryService;
-import se.maclean.learning.vertx.KryServicesForJson;
 import se.maclean.learning.vertx.LocalDiscDataSource;
 import se.maclean.learning.vertx.ServiceStatusRestProviderVerticle;
 import se.maclean.learning.vertx.ServiceProvider;
+import org.json.JSONArray;
+import org.json.JSONException;
 
 /**
  *
@@ -72,9 +75,14 @@ public class ServiceStatusRestProviderVerticleTest {
 
     vertx.createHttpClient().getNow(port, server, servicesEndPoint,
      response -> {
-      response.handler(body -> {        
-        KryServicesForJson serviceContainer = Json.decodeValue(body.toString(), KryServicesForJson.class);
-        context.assertTrue(serviceContainer.getServices().size() == 2, "Wrong no of services");        
+      response.handler(body -> {
+        JSONArray jsonArray = null;
+        try {
+          jsonArray = new JSONArray(body.toString());
+        } catch (JSONException ex) {
+          Logger.getLogger(ServiceStatusRestProviderVerticleTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        context.assertTrue(jsonArray.length() == 2, "Wrong no of services");        
         async.complete();
       });
     });

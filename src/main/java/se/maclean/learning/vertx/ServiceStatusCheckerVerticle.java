@@ -51,10 +51,10 @@ public class ServiceStatusCheckerVerticle extends AbstractVerticle {
   }
 
   private void checkAllServices() {
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
     for (KryService service : serviceProvider.get().values()) {
       int httpStatusCode = checkServiceStatus(service.getUrl());
       String status = httpStatusCode == 200 ? "OK" : "FAIL";
-      SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
       Date now = new Date();
       String lastCheck = sdf.format(now);
       serviceProvider.setStatus(service.getId(), String.valueOf(status), lastCheck);
@@ -71,7 +71,6 @@ public class ServiceStatusCheckerVerticle extends AbstractVerticle {
       connection = (HttpURLConnection) url.openConnection();
       connection.connect();
       httpStatusCode = connection.getResponseCode();
-
     } catch (MalformedURLException ex) {
       Logger.getLogger(ServiceStatusCheckerVerticle.class.getName()).log(Level.SEVERE, null, ex);
     } catch (IOException ex) {

@@ -12,6 +12,7 @@ import io.vertx.core.json.Json;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
+import io.vertx.ext.web.handler.StaticHandler;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -38,6 +39,8 @@ public class ServiceStatusRestProviderVerticle extends AbstractVerticle {
     router.get("/services").handler(this::getAllServices);
     router.post("/services").handler(this::addService);
     router.delete("/services/:id").handler(this::removeService);
+     // Serve static resources from the /assets directory
+    router.route("/assets/*").handler(StaticHandler.create("assets"));
 
     vertx.eventBus().consumer(ServiceStatusCheckerVerticle.MESSAGE_BUS_ADDRESS, message -> {
       if (message.body() == ServiceStatusCheckerVerticle.SERVICES_CHECKED) {
@@ -60,9 +63,7 @@ public class ServiceStatusRestProviderVerticle extends AbstractVerticle {
   }
 
   private void getAllServices(RoutingContext routingContext) {
-    KryServicesForJson kryServices = new KryServicesForJson(
-            new ArrayList(serviceProvider.get().values()));
-    String serializedServices = Json.encodePrettily(kryServices);
+    String serializedServices = Json.encodePrettily(serviceProvider.get().values());
     routingContext.response()
             .setStatusCode(200)
             .putHeader("content-type", "application/json; charset=utf-8")
