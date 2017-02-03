@@ -57,7 +57,7 @@
     function load() {
         $("#content").children().remove();
         $.getJSON("/services", function (data) {
-            $.each(data.services, function (key, val) {
+            $.each(data, function (key, val) {
                 $("<tr><td>" + val.name + "</td><td>" + val.url + "</td><td>" + val.status + "</td><td>" + val.lastCheck + "</td>" +
                         "<td>" +
                         "<button class='btn btn-danger btn-sm service-delete' data-id='" + val.id + "'>" +
