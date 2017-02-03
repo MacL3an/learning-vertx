@@ -12,12 +12,12 @@
 
 </head>
 <body>
-<div class="serviceapp" role="main">
+<div id="serviceapp" role="main">
     <div class="page-header">
         <div class="row">
             <div class="col-md-12">
                 <h1>Services</h1>
-                <button class="pull-right btn btn-primary" data-action="add" data-toggle="modal"
+                <button class="pull-left btn btn-primary" data-action="add" data-toggle="modal"
                         data-target="#newService">
                     <span class="glyphicon glyphicon-plus"></span> Add a new service
                 </button>
@@ -38,21 +38,59 @@
             </div>
         </div>
     </div>
+  
+    <div class="modal fade" id="newService" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="dialog">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                  <h4 class="modal-title" id="newServiceTitle">Add a new service</h4>
+              </div>
+              <div class="modal-body">
+                  <form>
+                      <div class="form-group">
+                          <label for="service-name" class="control-label">Name:</label>
+                          <input type="text" class="form-control" id="service-name">
+                      </div>
+                      <div class="form-group">
+                          <label for="service-url" class="control-label">URL:</label>
+                          <input type="text" class="form-control" id="service-url">
+                      </div>
+                  </form>
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                  <button type="button" id="addButton" class="btn btn-primary">Save</button>
+              </div>
+          </div>
+      </div>
+  </div>
+  
 </div>
+ 
   
   <script type="text/template" id="item-template">
-      <td><%- name %></td><td><%- url %></td><%- url %><td><%- status %></td><td><%- lastCheck %></td><td></td>
+      <td><%- name %></td>
+      <td><%- url %></td>
+      <%- url %><td><%- status %></td>
+      <td><%- lastCheck %></td>
+      <td>
+        <button class='btn btn-danger btn-sm delete-button' data-id=<%- id %>>
+          <span class='glyphicon glyphicon-minus'></span>
+        </button>
+      </td>
   </script>
 
   <script type="text/javascript">
     var Service = Backbone.Model.extend({
         defaults: {
-            id: "",
+            id: undefined,
             name: "",
             url: "",
             status: "",
             lastCheck: "",
         },
+        
         //url: "../services/",
         //idAttribute: "id"
     });
@@ -64,6 +102,9 @@
 
     var AppView = Backbone.View.extend({
       el: '#serviceapp',
+      events: {
+        'click #addButton': "newService",
+      },      
       initialize: function() {
         collection.on('add', this.addOne, this);
         collection.on('reset', this.addAll, this); //called on collection.fetch()
@@ -76,20 +117,41 @@
       addAll: function(){
         this.$('#service-list').html(''); // clean the todo list
         collection.each(this.addOne, this);
-      },    
+      },
+      newService: function() {
+        var newName = $("#service-name").val();
+        var newUrl = $("#service-url").val();
+        collection.create({name: newName, url: newUrl});
+        $('#newService').modal('toggle');
+        $('#service-name').val("");
+        $('#service-url').val("");        
+      }
     });
 
     var ServiceView = Backbone.View.extend({
       tagName: 'tr',
       template: _.template($('#item-template').html()),
+      initialize: function() {
+        this.model.on('destroy', this.remove, this); // remove: Convenience Backbone's function for removing the view from the DOM.
+      },      
       render: function() {
         this.$el.html(this.template(this.model.toJSON()));
         return this;
+      },
+      events: {
+        'click .delete-button': 'deleteClicked',
+      },
+      deleteClicked: function(){
+        console.log("deleting");
+        this.model.destroy();
       }
     });
 
     var collection = new ServiceCollection();
     var appView = new AppView();
+    setInterval(function() {
+          collection.fetch();
+        }, 5000);
 
   </script>
   
